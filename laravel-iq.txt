@@ -1,0 +1,316 @@
+This development build of composer is over 60 days old. It is recommend
+
+composer global require "laravel/installer=~1.1"
+
+After run above command, set of files will be download into the below location
+
+C:\Users\beta\AppData\Roaming\Composer
+
+http://laravel-recipes.com/recipes/59/clearing-the-compiled-class
+
+
+
+Step 1:
+-------
+composer create-project laravel/laravel {directory} "~5.0.0" --prefer-dist
+
+composer create-project laravel/laravel santa "~5.1.0" --prefer-dist
+
+Step 2:
+-------
+php artisan migrate:install
+Step 3:
+-------
+php artisan migrate
+
+To create controller
+
+ php artisan make:controller --plain AboutController
+
+***************************************************************************************************
+
+SELECT 
+--------
+SELECT METHOD 1
+---------------
+
+$someVariable = Input::get("some_variable");
+
+$results = DB::select( DB::raw("SELECT * FROM some_table WHERE some_col = :somevariable"), array(
+   'somevariable' => $someVariable,
+ ));
+
+
+SELECT METHOD 2
+---------------
+$users = DB::table('users')->get();
+
+SELECT METHOD 3
+---------------
+$result = \DB::select("select * from users where id=?",array(2));
+echo "<pre>";print_r($result);exit;
+
+----------------------------------------------------------------------------------------------------------------------------------
+
+Retrieving All Rows From A Table
+--------------------------------
+$users = DB::table('users')->get();
+
+foreach ($users as $user)
+{
+    var_dump($user->name);
+}
+Chunking Results From A Table
+-----------------------------
+DB::table('users')->chunk(100, function($users)
+{
+    foreach ($users as $user)
+    {
+        //
+    }
+});
+
+
+Retrieving A Single Row From A Table
+------------------------------------
+$user = DB::table('users')->where('name', 'John')->first();
+
+var_dump($user->name);
+
+
+Retrieving A Single Column From A Row
+-------------------------------------
+$name = DB::table('users')->where('name', 'John')->pluck('name');
+
+Retrieving A List Of Column Values
+
+$roles = DB::table('roles')->lists('title');
+Array
+(
+    [0] => bharanikumarbs@santa.com
+    [1] => santa-php@santa.com
+)
+
+
+$users = DB::table('users')->lists('email','name');
+		echo "<pre>";print_r($users);exit;
+
+Array
+(
+    [BHARANIKUMAR1] => bharanikumarbs@santa.com
+    [BHARANIKUMAR] => santa-php@santa.com
+)
+
+
+Specifying A Select Clause
+--------------------------
+$users = DB::table('users')->select('name', 'email')->get();
+
+$users = DB::table('users')->distinct()->get();
+
+$users = DB::table('users')->select('name as user_name')->get();
+
+
+
+
+Adding A Select Clause To An Existing Query
+--------------------------------------------
+$query = DB::table('users')->select('name');
+$users = $query->addSelect('age')->get();
+
+
+Using Where Operators
+---------------------
+$users = DB::table('users')->where('votes', '>', 100)->get();
+
+Or Statements
+-------------
+$users = DB::table('users')
+                    ->where('votes', '>', 100)
+                    ->orWhere('name', 'John')
+                    ->get();
+
+Using Where Between
+-------------------
+
+$users = DB::table('users')->whereBetween('votes', [1, 100])->get();
+
+Using Where Not Between
+-----------------------
+$users = DB::table('users')->whereNotBetween('votes', [1, 100])->get();
+
+Using Where In With An Array
+----------------------------
+
+$users = DB::table('users')
+                    ->whereIn('id', [1, 2, 3])->get();
+
+$users = DB::table('users')
+                    ->whereNotIn('id', [1, 2, 3])->get();
+
+Using Where Null To Find Records With Unset Values
+---------------------------------------------------
+$users = DB::table('users')->whereNull('updated_at')->get();
+
+Dynamic Where Clauses
+----------------------
+
+$admin = DB::table('users')->whereId(1)->first();
+
+$john = DB::table('users')
+                    ->whereIdAndEmail(2, 'john@doe.com')
+                    ->first();
+
+$jane = DB::table('users')
+                    ->whereNameOrAge('Jane', 22)
+                    ->first();
+
+
+Order By, Group By, And Having
+-----------------------------
+$users = DB::table('users')
+                    ->orderBy('name', 'desc')
+                    ->groupBy('count')
+                    ->having('count', '>', 100)
+                    ->get();
+
+
+Offset & Limit
+--------------
+$users = DB::table('users')->skip(10)->take(5)->get();
+
+
+Joins
+-----
+
+
+
+INSERT 
+------
+
+**
+     * Create a new flight instance.
+     *
+     * @param  Request  $request
+     * @return Response
+     */
+    public function store(Request $request)
+    {
+        // Validate the request...
+
+        $flight = new Flight;
+
+        $flight->name = $request->name;
+
+        $flight->save();
+    }
+
+
+method 1
+--------
+DB::insert('insert into users (id, name) values (?, ?)', [1, 'Dayle']);
+
+
+DB::table('users')->insert(
+    ['email' => 'john@example.com', 'votes' => 0]
+);
+
+Inserting Records Into A Table With An Auto-Incrementing ID
+
+$id = DB::table('users')->insertGetId(
+    ['email' => 'john@example.com', 'votes' => 0]
+);
+
+Inserting Multiple Records Into A Table
+
+DB::table('users')->insert([
+    ['email' => 'taylor@example.com', 'votes' => 0],
+    ['email' => 'dayle@example.com', 'votes' => 0]
+]);
+
+
+// Retrieve the flight by the attributes, or create it if it doesn't exist...
+$flight = App\Flight::firstOrCreate(['name' => 'Flight 10']);
+
+UPDATE
+
+DB::update('update users set votes = 100 where name = ?', ['John']);
+
+
+DELETE
+DB::delete('delete from users');
+
+deniedUrlLifetime:1
+
+Get form values
+ $hdn_search = Request::get('hdn_search');
+
+Select with DB Connection string:
+*********************************
+$results = \DB::connection('sqlsrv')->select();
+
+
+-----------------------------------------------------------------------------------------------------
+Database Transactions
+-----------------------------------------------------------------------------------------------------
+To run a set of operations within a database transaction, you may use the transaction method:
+
+DB::transaction(function()
+{
+    DB::table('users')->update(['votes' => 1]);
+
+    DB::table('posts')->delete();
+});
+
+    Note: Any exception thrown within the transaction closure will cause the transaction to be rolled back automatically.
+
+Sometimes you may need to begin a transaction yourself:
+
+DB::beginTransaction();
+
+You can rollback a transaction via the rollback method:
+
+DB::rollback();
+
+Lastly, you can commit a transaction via the commit method:
+
+DB::commit();
+
+
+Get records single
+------------------
+$result = \DB::select("select * from users where id=?",array(2));
+echo "<pre>";print_r($result);exit;
+
+Get records multiple
+--------------------
+$result = \DB::select("select * from users");
+echo "<pre>";print_r($result);exit;
+return view('admin.index', compact('users','chk_is_role','role_name'));
+Array
+(
+    [0] => stdClass Object
+        (
+            [id] => 1
+            [name] => BHARANIKUMAR
+            [email] => bharanikumarbs@santa.com
+            [password] => $2y$10$3T.7abN.20FgcBQYNPLn0Oi/itDbdzVJwHj7GKDSsrXsOWuUhiqCm
+            [remember_token] => sXbfvojqKpKvY7MdtiBpTdN7g763ou4jq5csROMHa5cyDC9w4jaYOjk9xX29
+            [created_at] => 2015-10-14 10:21:30
+            [updated_at] => 2015-10-14 10:22:12
+            [is_admin] => 0
+        )
+
+    [1] => stdClass Object
+        (
+            [id] => 2
+            [name] => BHARANIKUMAR
+            [email] => bharanikumarbs1@santa.com
+            [password] => $2y$10$srcvu6FO/IIs3Ti67JlVE.FB4FrBaCa40hMrgEP.at0QwpOudpL8i
+            [remember_token] => 
+            [created_at] => 2015-10-14 10:22:37
+            [updated_at] => 2015-10-14 10:22:37
+            [is_admin] => 0
+        )
+
+)
